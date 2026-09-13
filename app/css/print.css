@@ -53,9 +53,6 @@ body {
 #view { padding: 0 !important; }
 .shell { max-width: none; padding-inline: 0; }
 
-/* One bold rule at the top of the sheet, as on screen. */
-.sadu-band { height: 6mm; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
-
 .panel, .sheet-surface, .meter, .kv, .matrix-wrap, .stage, .member, .iter {
   break-inside: avoid;
   box-shadow: none !important;
@@ -64,7 +61,7 @@ body {
 h1, h2, h3 { break-after: avoid; }
 
 /* Colour is data here — a health meter printed grey says nothing. */
-.meter-cell, .matrix-cell, .status .swatch, .sadu-band, .weave-fill {
+.meter-cell, .matrix-cell, .status .swatch, .weave-fill {
   print-color-adjust: exact;
   -webkit-print-color-adjust: exact;
 }

@@ -46,8 +46,6 @@ export default async function posterView(ctx) {
     html: html`<div class="poster" style="--pw:${size.w}mm; --ph:${size.h}mm; --pscale:${size.scale}">
       <style>@page { size: ${raw(size.w)}mm ${raw(size.h)}mm; margin: 0 }</style>
 
-      <div class="sadu-band" data-size="tall" role="presentation"></div>
-
       <header class="poster-head">
         <span class="lockup" role="img" aria-label="Warif وارف"></span>
         <div class="poster-title">
@@ -158,8 +156,6 @@ export default async function posterView(ctx) {
         <p>${L(CONFIG.disclaimer)}</p>
         <p>${L(POSTER.credits)}</p>
       </footer>
-
-      <div class="sadu-band" data-size="tall" role="presentation"></div>
     </div>`,
 
     mount(root) {

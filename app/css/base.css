@@ -146,7 +146,7 @@
     background: var(--primary); color: var(--on-primary);
     text-decoration: none; font-weight: 500;
   }
-  .skip:focus { inset-block-start: calc(var(--band-h) + .5rem); }
+  .skip:focus { inset-block-start: .5rem; }
 
   /* ------------------------------------------------------------ reduced motion
      Honoured as a floor, and the settings sheet can force it on top. The app

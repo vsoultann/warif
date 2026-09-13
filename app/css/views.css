@@ -19,7 +19,6 @@
   }
 
   /* Kiosk, slides and poster paint the whole window themselves. */
-  body[data-chrome='bare'] > .sadu-band,
   body[data-chrome='bare'] > .topbar,
   body[data-chrome='bare'] > .tabbar { display: none; }
   body[data-chrome='bare'] #view { padding-block: 0; }
@@ -100,7 +99,14 @@
     display: grid;
     gap: clamp(1.25rem, 3vw, 2.5rem);
     padding-block: clamp(1.25rem, 3vw, 2.5rem);
-    grid-template-columns: 1fr;
+    /* minmax(0, 1fr) rather than 1fr: a bare 1fr track takes an automatic
+       minimum from its contents, and the trees strip's min-content is ten
+       160px cards wide. That blew the single-column track out to 1,708px on a
+       phone -- the strip stopped scrolling inside itself and scrolled the whole
+       page sideways instead, which left the hero sitting off-centre in a page
+       far wider than the window. The desktop rule below already used
+       minmax(0, 1fr), which is why only the phone layout was wrong. */
+    grid-template-columns: minmax(0, 1fr);
   }
   @media (min-width: 900px) {
     .stage { --stage-h: min(70vh, 620px); }
@@ -223,6 +229,11 @@
     gap: .75rem;
     overflow-x: auto;
     padding-block-end: .5rem;
+    /* An end gutter, so the last card scrolls clear of the edge instead of
+       stopping flush against it, and scroll padding to match so a snapped
+       card is never parked underneath that gutter. */
+    padding-inline-end: var(--gutter);
+    scroll-padding-inline: 0 var(--gutter);
     scroll-snap-type: x mandatory;
     overscroll-behavior-x: contain;
   }
@@ -262,7 +273,7 @@
   @media (min-width: 900px) {
     .result { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); }
     .result-title { grid-column: 1 / -1; }
-    .result-side { position: sticky; inset-block-start: calc(64px + var(--band-h) + 1rem); }
+    .result-side { position: sticky; inset-block-start: calc(64px + 1rem); }
   }
   .result-empty { padding-block: 4rem; }
 
@@ -966,7 +977,6 @@
     font-size: 4.6mm;
     line-height: 1.45;
   }
-  .poster .sadu-band { --band-h: 8mm; }
   .poster-head {
     display: grid;
     grid-template-columns: auto 1fr auto;

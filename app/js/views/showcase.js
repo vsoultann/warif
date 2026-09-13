@@ -34,8 +34,6 @@ export default function showcaseView() {
 
   return {
     html: html`<div class="kiosk" id="kiosk">
-      <div class="sadu-band" data-size="tall" role="presentation"></div>
-
       <main class="kiosk-body">
         <button class="kiosk-logo" id="kiosk-logo" type="button" aria-label="${t('showcase.exit')}">
           <span class="lockup-stacked" role="img" aria-label="Warif وارف"></span>
@@ -59,7 +57,6 @@ export default function showcaseView() {
       </main>
 
       <p class="kiosk-exit small">${t('showcase.exit')}</p>
-      <div class="sadu-band" data-size="tall" role="presentation"></div>
     </div>`,
 
     mount: (root) => mount(root, facts),

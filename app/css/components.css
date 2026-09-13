@@ -9,20 +9,6 @@
 
 @layer components {
 
-  /* ==================================================== the Sadu band ===== */
-  /* The one bold thing. It replaces v1's flag rule at the top of every screen,
-     which is both a stronger piece of identity and a more respectful use of the
-     flag -- that now appears once, on the Project page, where it means something. */
-  .sadu-band {
-    height: var(--band-h);
-    background-image: var(--sadu-tile);
-    background-repeat: repeat-x;
-    background-size: auto 100%;
-    image-rendering: pixelated;
-    flex: none;
-  }
-  .sadu-band[data-size='tall'] { --band-h: 20px; }
-
   /* ==================================================== brand lockups ===== */
   .lockup {
     display: block;

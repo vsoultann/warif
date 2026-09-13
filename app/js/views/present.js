@@ -30,8 +30,6 @@ export default function presentView(ctx) {
 
   return {
     html: html`<div class="deck" id="deck" data-notes="0" data-timer="0" style="--slide:${start}">
-      <div class="sadu-band" role="presentation"></div>
-
       <div class="deck-stage">
         ${raw(SLIDES.map((slide, i) => `<section class="slide" data-index="${i}"${i === start ? '' : ' hidden'}>${body(slide)}</section>`))}
       </div>

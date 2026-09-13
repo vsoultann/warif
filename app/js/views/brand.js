@@ -77,12 +77,6 @@ export default function brandView() {
       </section>
 
       <section class="panel">
-        <div class="section-head"><h2>${t('brand.band')}</h2></div>
-        <div class="sadu-band" data-size="tall" role="presentation"></div>
-        <p class="measure" style="margin-block-start:1rem">${L(BAND_STORY)}</p>
-      </section>
-
-      <section class="panel">
         <div class="section-head"><h2>${t('brand.palette')}</h2></div>
         <div class="swatches">
           ${raw(CORE.map((c) => `<figure class="swatch">
@@ -127,11 +121,6 @@ export default function brandView() {
 const MARK_STORY = {
   en: 'A leaf split along its midrib. The left half is smooth — nature as it grows. The right half is woven in rows, the way Al Sadu is built on a grid of warp and weft, which is the same grid logic as the pixels a camera sees. At the centre is a concentric diamond, a classic Sadu motif: the point where the model looks, and a nod to Al Ain, the spring and the eye, where it was built.',
   ar: 'ورقةٌ مشقوقة على عرقها الأوسط: نصفها الأيسر أملس كما تنبت في الطبيعة، ونصفها الأيمن منسوجٌ صفّاً صفّاً كما يُبنى السدو على شبكة السدى واللحمة، وهي شبكة البكسل نفسها التي تراها الكاميرا. وفي قلبها معيّنٌ متحد المركز، وهو من رموز السدو الأصيلة: النقطة التي ينظر إليها النموذج، وإشارةٌ إلى العين حيث صُنع.',
-};
-
-const BAND_STORY = {
-  en: 'One bold element, and everything else stays quiet. The band runs across the top of every screen, drives the analysis progress indicator, borders the poster and the slides, and fills the kiosk attract screen. It is drawn from a pixel map and rendered with crisp edges, so it is a weave and a bitmap at the same time.',
-  ar: 'عنصرٌ بارزٌ واحد، وكل ما عداه هادئ. يمتد الشريط أعلى كل شاشة، ويقود مؤشر تقدّم التحليل، ويُحيط بالملصق والشرائح، ويملأ شاشة الكشك. وهو مرسوم من خريطة بكسل بحوافّ حادة، فهو نسيجٌ وصورةٌ نقطية في آنٍ واحد.',
 };
 
 const VARIANTS = [

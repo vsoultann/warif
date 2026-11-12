@@ -19,6 +19,9 @@ export const SPECIES = [
   {
     key: 'sidr',
     taxonId: 322319,
+    // Sidr and Samar were the pair the four-class model mixed up most, so both
+    // get twice the reference photos of the rest.
+    fetch: 800,
     latin: 'Ziziphus spina-christi',
     en: 'Sidr',
     ar: 'السدر',
@@ -33,6 +36,7 @@ export const SPECIES = [
   {
     key: 'samar',
     taxonId: 489563,
+    fetch: 800,
     latin: 'Vachellia tortilis',
     en: 'Samar',
     ar: 'السمر',
@@ -93,6 +97,27 @@ export const SPECIES = [
     latin: 'Prosopis juliflora',
     en: 'Mesquite',
     ar: 'المسكيت',
+  },
+
+  /* ---- added 2026-11-12 ---- */
+
+  {
+    // Madagascar periwinkle. Grown in nearly every UAE flower bed and roundabout
+    // because it shrugs off heat and salty water, and it is on the kiosk table.
+    key: 'vinca',
+    taxonId: 62924,
+    latin: 'Catharanthus roseus',
+    en: 'Vinca (Periwinkle)',
+    ar: 'الونكة',
+  },
+  {
+    // Grown in UAE gardens and farms for its fruit; the deeply lobed leaf is
+    // unlike anything else in the set. Also on the kiosk table.
+    key: 'papaya',
+    taxonId: 62811,
+    latin: 'Carica papaya',
+    en: 'Papaya',
+    ar: 'البابايا',
   },
 ];
 

@@ -97,6 +97,20 @@ export const TUNING = {
   confidentCoverage: 0.16, // at or above this, framing is not a concern
   solidityFloor: 0.30,     // share of the mask surviving erosion: below this the
   solidityGood: 0.65,      //   "leaf" is scattered speckle, not a solid object
+
+  /* --- v3: brown and yellow only count when attached to green leaf --- */
+  attachMinGreenShare: 0.30, // below this share of green the subject is one dead
+                             //   leaf, and everything brown in it is the leaf
+  attachMinGreenFrame: 0.015,// ... unless there is plainly a living plant in shot
+  attachGreenHue: 55,        // what counts as unmistakably green leaf
+  attachGreenExg: 0.03,
+  attachTouch: 0.18,         // share of a blob's edge that must touch green
+  attachTouchDark: 0.30,     //   ... and for a dark blob (soil, shadow, pot rim)
+  attachDarkValue: 0.30,
+  attachTouchYellow: 0.06,   // a bright yellow patch joined to green
+  attachYellowValue: 0.45,
+  attachTouchVeryDark: 0.60, // soil and shadow glimpsed between leaves: only a
+  attachVeryDarkValue: 0.22, //   spot ringed by leaf all round is a lesion
 };
 
 /* ---------- colour helpers ---------- */
@@ -258,6 +272,80 @@ function erode(mask, w, h, times = 2) {
   return cur;
 }
 
+/**
+ * Removes brown and yellow blobs that are not attached to green leaf.
+ *
+ * Every 4-connected run of non-green tissue is measured along its edge: what
+ * share of the pixels it borders are healthy green? A blob that is mostly ringed
+ * by green is damage on a leaf and stays. One that mostly borders the floor, the
+ * pot or nothing at all is the scene, and is taken out of the mask entirely.
+ * Dark blobs need more green around them than pale ones, because the false
+ * positives are dark (soil, shadow, a pot rim) and real dead tissue rarely is.
+ *
+ * "Green" here is strict -- a real leaf hue with real Excess Green -- because
+ * the pixel classes above call anything in the mask that is neither yellow nor
+ * brown "healthy", and a wooden wall panel or a tan sleeve lands there too.
+ * Those muddy in-between pixels are judged with the brown and yellow ones, so a
+ * wooden panel goes out whole rather than leaving its greenish half behind.
+ *
+ * Mutates `mask` and `cls`; returns how many pixels of each class it removed.
+ */
+function dropDetachedDamage(mask, cls, val, hue, exgn, w, h, T) {
+  const n = w * h;
+  const green = new Uint8Array(n);
+  for (let i = 0; i < n; i++) {
+    green[i] = cls[i] === 1 && hue[i] >= T.attachGreenHue && exgn[i] > T.attachGreenExg ? 1 : 0;
+  }
+  const seen = new Uint8Array(n);
+  const stack = new Int32Array(n);
+  const members = new Int32Array(n);
+  let droppedOk = 0, droppedChl = 0, droppedNec = 0;
+
+  for (let start = 0; start < n; start++) {
+    if (seen[start] || !mask[start] || green[start]) continue;
+    let sp = 0, count = 0, edge = 0, edgeGreen = 0, vSum = 0, yellow = 0;
+    stack[sp++] = start;
+    seen[start] = 1;
+    while (sp) {
+      const i = stack[--sp];
+      members[count++] = i;
+      vSum += val[i];
+      if (cls[i] === 2) yellow++;
+      const x = i % w;
+      const y = (i / w) | 0;
+      const around = [x > 0 ? i - 1 : -1, x < w - 1 ? i + 1 : -1, y > 0 ? i - w : -1, y < h - 1 ? i + w : -1];
+      for (const j of around) {
+        if (j < 0) { edge++; continue; }
+        if (mask[j] && !green[j]) {
+          if (!seen[j]) { seen[j] = 1; stack[sp++] = j; }
+        } else {
+          edge++;
+          if (green[j]) edgeGreen++;
+        }
+      }
+    }
+    const touch = edge ? edgeGreen / edge : 0;
+    const meanV = vSum / count;
+    // A bright, mostly yellow patch is the shape chlorosis takes: a whole
+    // half of a blade gone yellow meets the green part along one short line.
+    // Nothing in the kiosk scenes looked like that, so it needs less contact.
+    const brightYellow = yellow >= count * 0.6 && meanV >= T.attachYellowValue;
+    const need = meanV < T.attachVeryDarkValue ? T.attachTouchVeryDark
+      : meanV < T.attachDarkValue ? T.attachTouchDark
+      : brightYellow ? T.attachTouchYellow : T.attachTouch;
+    if (touch >= need) continue;   // on a leaf
+    for (let k = 0; k < count; k++) {
+      const i = members[k];
+      if (cls[i] === 1) droppedOk++;
+      else if (cls[i] === 2) droppedChl++;
+      else droppedNec++;
+      cls[i] = 0;
+      mask[i] = 0;
+    }
+  }
+  return { healthy: droppedOk, chlorotic: droppedChl, necrotic: droppedNec };
+}
+
 /* ---------- the analysis itself ---------- */
 
 /**
@@ -322,7 +410,7 @@ export function analysePixels(px, w, h, opts = {}) {
 
   let tissue = 0;
   for (let i = 0; i < n; i++) tissue += mask[i];
-  const coverage = tissue / n;
+  let coverage = tissue / n;
 
   /* ---------- 4. classify each leaf pixel ---------- */
 
@@ -363,6 +451,34 @@ export function analysePixels(px, w, h, opts = {}) {
     } else {
       cls[i] = 1; healthy++;
     }
+  }
+
+  /* ---------- 4b. damage has to be *on* a leaf ---------- */
+
+  // v3. The kiosk does not photograph a leaf on paper; it photographs a potted
+  // plant on the floor. The brown in that frame is mostly the soil in the pot,
+  // the hand holding the phone, a table leg and the grout between tiles, and v2
+  // scored every one of them as dead leaf tissue -- a healthy vinca came back
+  // "Stressed, 49% necrotic". Real damage is not like that: a lesion sits inside
+  // a green blade, a scorched tip is still joined to the green part of its leaf.
+  // So a brown or yellow blob only counts as leaf when a real share of its edge
+  // touches healthy green tissue. Measured on the team's kiosk photographs, the
+  // soil, skin and grout blobs touch green along 0-12% of their edge; a lesion
+  // ringed by leaf touches it along most of its edge.
+  //
+  // A frame with little green in it -- one dead leaf on its own -- skips this
+  // test, so a leaf that really is brown all over is still read as necrotic.
+  let leafGreen = 0;
+  for (let i = 0; i < n; i++) {
+    if (cls[i] === 1 && hue[i] >= T.attachGreenHue && exgn[i] > T.attachGreenExg) leafGreen++;
+  }
+  if (leafGreen >= tissue * T.attachMinGreenShare || leafGreen >= n * T.attachMinGreenFrame) {
+    const dropped = dropDetachedDamage(mask, cls, val, hue, exgn, w, h, T);
+    healthy -= dropped.healthy;
+    chlorotic -= dropped.chlorotic;
+    necrotic -= dropped.necrotic;
+    tissue -= dropped.healthy + dropped.chlorotic + dropped.necrotic;
+    coverage = tissue / n;
   }
 
   /* ---------- 5. bail out if there is no leaf ---------- */
@@ -460,9 +576,11 @@ export function analysePixels(px, w, h, opts = {}) {
   if (uniformity < T.mottledBelow) findings.push({ level: 'warn', key: 'mottled' });
   if (texture > T.textureAbove) findings.push({ level: 'warn', key: 'texture' });
   if (greenness < T.paleBelow) findings.push({ level: 'warn', key: 'pale' });
-  if (coverage < T.smallLeafBelow) findings.push({ level: 'warn', key: 'smallLeaf', v: pct(coverage) });
+  if (coverage < T.smallLeafBelow) findings.push({ level: 'info', key: 'smallLeaf', v: pct(coverage) });
 
-  const problems = findings.filter((f) => f.level !== 'ok').length;
+  // Framing advice is not a symptom: a small leaf in the frame says nothing about
+  // the plant, so it never turns a clean reading into a problem.
+  const problems = findings.filter((f) => f.level === 'warn' || f.level === 'bad').length;
   if (!problems) findings.push({ level: 'ok', key: 'clean' });
   if (necrosis < T.necrosisFree && chlorosis < T.chlorosisFree) {
     findings.unshift({ level: 'ok', key: 'evenColour' });
@@ -512,6 +630,44 @@ export function analysePixels(px, w, h, opts = {}) {
 }
 
 function clamp01(x) { return Math.min(1, Math.max(0, x)); }
+
+/**
+ * Species whose healthy foliage is naturally pale, grey or blue-green.
+ *
+ * Apple of Sodom is woolly grey-green, Ghaf and Samar blue-green, Athel and
+ * the mangrove grey with salt. Scored against a generic "how green is it"
+ * bar, every one of them reads as low-chlorophyll while perfectly healthy. Once
+ * the classifier has named the plant, the greenness test is judged against the
+ * species instead of against a lettuce.
+ */
+const NATURALLY_PALE = new Set(['osher', 'ghaf', 'samar', 'athl', 'qurm', 'arak', 'mesquite']);
+
+/**
+ * Re-reads a health result in the light of which species it is.
+ *
+ * Only ever removes a finding the species explains; it never adds one. Called
+ * once the classifier has answered and is confident or uncertain (not when it
+ * refused to name the plant, because then there is no species to judge by).
+ */
+export function refineForSpecies(result, speciesKey) {
+  if (!result?.valid || !NATURALLY_PALE.has(speciesKey)) return result;
+  if (!result.findings.some((f) => f.key === 'pale')) return result;
+  const T = TUNING;
+  const m = result.metrics;
+  const penalty = Math.max(0, T.greennessFloor - m.greenness) * T.greennessWeight;
+  const score = Math.round(Math.min(100, result.score + penalty));
+  const band =
+    score >= 85 ? 'excellent' :
+    score >= 70 ? 'good' :
+    score >= 52 ? 'fair' :
+    score >= 32 ? 'poor' : 'critical';
+  let findings = result.findings.filter((f) => f.key !== 'pale');
+  findings.push({ level: 'info', key: 'speciesNormal' });
+  if (!findings.some((f) => f.level === 'warn' || f.level === 'bad') && !findings.some((f) => f.key === 'clean')) {
+    findings = [...findings, { level: 'ok', key: 'clean' }];
+  }
+  return { ...result, score, band, findings };
+}
 
 /** Tints the classified pixels so the user can see *where* the damage is. */
 function paintOverlay(px, cls, grey, n) {
@@ -570,6 +726,7 @@ export const FINDING_TEXT = {
     pale: 'Overall greenness is low — the leaf is pale, suggesting reduced chlorophyll.',
     smallLeaf: (v) => `The leaf fills only ${v}% of the frame; move closer for a more reliable reading.`,
     noLeaf: 'No leaf could be separated from the background. Use a plain, contrasting backdrop and fill more of the frame.',
+    speciesNormal: 'Pale, grey-green foliage is normal for this species, so it is not counted as a problem.',
   },
   ar: {
     clean: 'لم يُرصد تغيّر لوني أو ضرر ملحوظ.',
@@ -583,5 +740,6 @@ export const FINDING_TEXT = {
     pale: 'درجة الخضرة منخفضة والورقة شاحبة، ما يشير إلى نقص الكلوروفيل.',
     smallLeaf: (v) => `الورقة تملأ ${v}٪ فقط من الإطار؛ اقترب أكثر للحصول على قراءة أدق.`,
     noLeaf: 'تعذّر فصل الورقة عن الخلفية. استخدم خلفية سادة مغايرة واملأ الإطار بالورقة.',
+    speciesNormal: 'الأوراق الشاحبة الرمادية المخضرة طبيعية في هذا النوع، ولذلك لا تُحسب مشكلة.',
   },
 };

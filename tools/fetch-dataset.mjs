@@ -17,7 +17,7 @@ const ROOT = path.resolve(import.meta.dirname, '..');
 const OUT = path.join(ROOT, 'dataset', 'inaturalist');
 
 const args = process.argv.slice(2);
-const perClass = Number(args[args.indexOf('--per-class') + 1]) || 400;
+const defaultPerClass = Number(args[args.indexOf('--per-class') + 1]) || 400;
 const force = args.includes('--force');
 
 const OPEN_LICENCES = ['cc0', 'cc-by', 'cc-by-sa', 'cc-by-nc', 'cc-by-nc-sa'];
@@ -42,7 +42,7 @@ async function api(url, attempt = 0) {
 async function listPhotos(taxonId, want) {
   const found = [];
   const seen = new Set();
-  for (let page = 1; page <= 12 && found.length < want * 3; page++) {
+  for (let page = 1; page <= 20 && found.length < want * 3; page++) {
     const url =
       `https://api.inaturalist.org/v1/observations?taxon_id=${taxonId}` +
       `&quality_grade=research&photos=true&photo_license=${OPEN_LICENCES.join(',')}` +
@@ -101,6 +101,7 @@ async function looksLikeFoliage(buffer) {
 }
 
 async function fetchSpecies(species) {
+  const perClass = Math.max(defaultPerClass, species.fetch || 0);
   const dir = path.join(OUT, species.key);
   await fs.mkdir(dir, { recursive: true });
 
@@ -118,31 +119,45 @@ async function fetchSpecies(species) {
   let kept = 0;
   let rejected = 0;
 
-  for (const photo of candidates) {
-    if (kept >= perClass) break;
+  // Photos come off a static CDN rather than the API, so a few run at once; the
+  // API listing above is what the one-request-per-second guidance is about.
+  async function one(photo) {
     const dest = path.join(dir, `${photo.id}.jpg`);
-    try {
-      await fs.access(dest);
-      kept++;
-      continue; // already downloaded on a previous run
-    } catch { /* not cached, carry on */ }
-
+    // Already on disk from an interrupted run: still owed its credit line.
+    try { await fs.access(dest); credits.push(photo); return 'kept'; } catch { /* not cached, carry on */ }
     try {
       const res = await fetch(photo.url, { headers: { 'User-Agent': UA } });
-      if (!res.ok) continue;
+      if (!res.ok) return 'dead';
       const buf = Buffer.from(await res.arrayBuffer());
-      if (!(await looksLikeFoliage(buf))) { rejected++; continue; }
+      if (!(await looksLikeFoliage(buf))) return 'rejected';
       // Normalise to a square 256px JPEG so training loads are uniform.
       await sharp(buf, { failOn: 'none' })
         .resize(256, 256, { fit: 'cover', position: 'attention' })
         .jpeg({ quality: 88 })
         .toFile(dest);
       credits.push(photo);
-      kept++;
-      if (kept % 50 === 0) process.stdout.write(`    ...${kept}\n`);
-    } catch { /* a dead photo URL is not worth aborting the run for */ }
-    await sleep(120);
+      return 'kept';
+    } catch { return 'dead'; } // a dead photo URL is not worth aborting the run for
   }
+
+  // A rolling pool: each lane takes the next photo as soon as its last one is
+  // done, so one slow download never holds the others up.
+  const LANES = 32;
+  let next = 0;
+  let reported = 0;
+  await Promise.all(Array.from({ length: LANES }, async () => {
+    while (next < candidates.length && kept < perClass) {
+      const r = await one(candidates[next++]);
+      if (r === 'kept') kept++;
+      else if (r === 'rejected') rejected++;
+      if (kept - reported >= 50) { reported = kept; process.stdout.write(`    ...${kept}\n`); }
+    }
+  }));
+  // Lanes still in flight when the target was reached may overshoot slightly;
+  // trim the extras so every class lands on its intended count.
+  const onDisk = (await fs.readdir(dir)).filter((n) => n.endsWith('.jpg')).sort();
+  for (const extra of onDisk.slice(perClass)) await fs.rm(path.join(dir, extra));
+  kept = Math.min(kept, perClass);
 
   console.log(`  ${species.en.padEnd(10)} kept ${kept}, rejected ${rejected} as non-foliage`);
   return { kept, credits };
@@ -166,7 +181,7 @@ async function existingCredits() {
 
 const carried = await existingCredits();
 const manifest = { generated: new Date().toISOString(), source: 'iNaturalist', classes: {} };
-console.log(`Fetching up to ${perClass} images per species into dataset/inaturalist/\n`);
+console.log(`Fetching up to ${defaultPerClass} images per species into dataset/inaturalist/\n`);
 
 for (const species of SPECIES) {
   const { kept, credits } = await fetchSpecies(species);
@@ -175,8 +190,10 @@ for (const species of SPECIES) {
   // time, and both sets belong in the manifest.
   const byId = new Map(previous.map((c) => [c.id, c]));
   for (const c of credits) byId.set(c.id, c);
+  const onDisk = new Set((await fs.readdir(path.join(OUT, species.key))).map((n) => n.replace(/\.jpg$/, '')));
   manifest.classes[species.key] = {
-    latin: species.latin, count: kept, credits: [...byId.values()],
+    latin: species.latin, count: kept,
+    credits: [...byId.values()].filter((c) => onDisk.has(String(c.id))),
   };
 }
 

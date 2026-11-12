@@ -29,6 +29,7 @@
  */
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 import sharp from 'sharp';
 import { SPECIES } from './species.mjs';
 
@@ -75,7 +76,7 @@ function installCanvasShim() {
 }
 installCanvasShim();
 
-const mod = await import(IMPL);
+const mod = await import(pathToFileURL(IMPL).href);
 const analyse = mod.analysePixels
   ? (data, w, h) => mod.analysePixels(data, w, h, { paint: false })
   : (data, w, h) => {

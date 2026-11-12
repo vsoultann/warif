@@ -1,5 +1,5 @@
 /**
- * Reference data for the ten trees in the Warif library.
+ * Reference data for the twelve plants in the Warif library.
  *
  * `key` and the ordering here must match tools/species.mjs and the class order
  * baked into the trained model's metadata -- model.js asserts this on load.
@@ -75,6 +75,11 @@ export const SPECIES = [
       health:
         'العروق الثلاثة يجب أن تبقى واضحة وخضراء. السدر عرضة لحشرات صانعة الأنفاق التي تترك خطوطاً شاحبة متعرجة، وللعفن الأسود الذي يظهر كطبقة سوداء على السطح اللامع.',
     },
+    lookalike: {
+      key: 'samar',
+      en: 'Samar (Vachellia tortilis) grows in the same wadis and is the tree a Sidr is most often taken for from a distance. Up close they are nothing alike: a Sidr leaf is a single glossy oval with three veins running from its base, while a Samar leaf is split into dozens of leaflets a few millimetres long. Sidr thorns come in pairs, one straight and one hooked; Samar carries long straight white thorns.',
+      ar: 'السمر (Vachellia tortilis) ينمو في الأودية نفسها، وهو الشجرة التي يُظن السدر أنه هي من بعيد. أما من قرب فلا شبه بينهما: ورقة السدر بيضاوية لامعة واحدة تخرج من قاعدتها ثلاثة عروق، وورقة السمر مقسّمة إلى عشرات الوريقات التي لا يتجاوز طولها بضعة مليمترات. أشواك السدر أزواج، واحد مستقيم وآخر معقوف، أما السمر فأشواكه بيضاء طويلة مستقيمة.',
+    },
   },
   {
     key: 'nakhl',
@@ -126,6 +131,11 @@ export const SPECIES = [
       significance: 'نوع أساسي في السهول الحصوية والأودية الإماراتية؛ ظله يخفض حرارة الأرض بما يكفي لإنبات نباتات أخرى.',
       health:
         'لصغر الوريقات تُقاس الصحة بكثافة التاج لا بالورقة الواحدة. التخلخل الذي يكشف الأغصان يعني إجهاد جفاف أو رعياً مفرطاً، والعقد المتورمة عند قواعد الأشواك تدل على إصابة حشرية.',
+    },
+    lookalike: {
+      key: 'sidr',
+      en: 'Sidr (Ziziphus spina-christi) shares the Samar’s wadis and its thorny, spreading build. Look at a single leaf: if it is one glossy oval, 2–6 cm long with three veins from the base, it is a Sidr. If it is feathery and made of tiny paired leaflets, it is a Samar.',
+      ar: 'السدر (Ziziphus spina-christi) يشارك السمر أوديته وشكله الشوكي المنتشر. انظر إلى ورقة واحدة: إن كانت بيضاوية لامعة واحدة طولها 2–6 سم تخرج من قاعدتها ثلاثة عروق فهي سدر، وإن كانت ريشية مكوّنة من وريقات صغيرة مزدوجة فهي سمر.',
     },
   },
   {
@@ -293,6 +303,60 @@ export const SPECIES = [
       key: 'ghaf',
       en: 'The native Ghaf (Prosopis cineraria) is the tree mesquite is usually mistaken for, and the mistake matters: one is a protected national symbol and the other should be reported. The Ghaf has short scattered thorns and smaller, blue-green leaflets; mesquite has long paired spines and larger, brighter foliage.',
       ar: 'الغاف المحلي (Prosopis cineraria) هو الشجرة التي يُخلط بينها وبين المسكيت غالباً، والخلط هنا مهم: إحداهما رمز وطني محمي، والأخرى يجب الإبلاغ عنها. للغاف أشواك قصيرة متفرقة ووريقات أصغر خضراء مزرقة، وللمسكيت أشواك طويلة مزدوجة وأوراق أكبر وأشدّ خضرة.',
+    },
+  },
+  {
+    key: 'vinca',
+    status: 'introduced',
+    latin: 'Catharanthus roseus',
+    en: {
+      name: 'Vinca (Periwinkle)',
+      family: 'Apocynaceae (dogbane family)',
+      leaf: 'Simple, glossy, dark green oval leaves 3–9 cm long, set in opposite pairs along a soft green or reddish stem. The edge is smooth, the tip rounded, and a pale, almost white midrib runs straight down the centre.',
+      about:
+        'The Madagascar periwinkle is the low, glossy plant with five-petalled pink, white or purple flowers filling flower beds, roundabouts and road verges right across the UAE. Landscapers choose it because it flowers almost all year, takes the summer heat and tolerates salty irrigation water better than most bedding plants. It is also one of the most important plants in modern medicine: two of its alkaloids, vinblastine and vincristine, are chemotherapy drugs.',
+      significance:
+        'Probably the most-planted flower in UAE public landscaping, and a reminder that a plant on a roundabout can be in a hospital pharmacy too. Every part of it is poisonous to eat.',
+      health:
+        'A healthy vinca leaf is deep, even and glossy. Yellowing lower leaves with a soft, darkening stem base almost always means the roots are sitting wet — overwatering and poor drainage cause root rot here far more often than drought does. Brown spots with darker rims are a fungal leaf spot, and sticky, curled new growth points to aphids or whitefly.',
+    },
+    ar: {
+      name: 'الونكة',
+      family: 'الفصيلة الدفلية',
+      leaf: 'أوراق بسيطة بيضاوية خضراء داكنة لامعة طولها 3–9 سم، في أزواج متقابلة على ساق طرية خضراء أو محمرّة. حافتها ملساء وقمتها مستديرة، ويمتد في وسطها عرق رئيسي شاحب يكاد يكون أبيض.',
+      about:
+        'الونكة هي النبتة القصيرة اللامعة ذات الأزهار الخماسية الوردية أو البيضاء أو البنفسجية التي تملأ أحواض الزهور والدوّارات وجوانب الطرق في أنحاء الإمارات. يختارها منسّقو الحدائق لأنها تزهر طوال العام تقريباً، وتتحمل حر الصيف وملوحة مياه الري أكثر من معظم نباتات الزينة. وهي أيضاً من أهم النباتات في الطب الحديث، إذ يُستخرج منها مركّبان يُستخدمان في علاج السرطان.',
+      significance:
+        'من أكثر الأزهار زراعةً في التشجير العام بالإمارات، وتذكير بأن نبتة على دوّار قد تكون في صيدلية مستشفى أيضاً. وكل أجزائها سامة إن أُكلت.',
+      health:
+        'ورقة الونكة السليمة داكنة متجانسة لامعة. اصفرار الأوراق السفلية مع ليونة قاعدة الساق واسودادها يعني غالباً أن الجذور غارقة في الماء، فالإفراط في الري وسوء الصرف يسببان تعفن الجذور أكثر بكثير مما يسببه العطش. البقع البنية ذات الحواف الداكنة تبقّع فطري، والنموات الجديدة الملتفة اللزجة تدل على المنّ أو الذبابة البيضاء.',
+    },
+  },
+  {
+    key: 'papaya',
+    status: 'introduced',
+    latin: 'Carica papaya',
+    en: {
+      name: 'Papaya',
+      family: 'Caricaceae (papaya family)',
+      leaf: 'Huge, hand-shaped leaves 40–70 cm across, deeply cut into 7–11 lobes that are themselves lobed again. Each sits on a long, hollow stalk springing from the top of a single unbranched trunk. Mid green above, paler below, with pale veins fanning out from the centre.',
+      about:
+        'Papaya is a fast-growing fruit plant — botanically a giant herb rather than a true tree — grown in back gardens and farms across the UAE, where it can fruit within a year of planting. Its trunk is soft and hollow, and it carries all of its leaves in one crown at the top, which makes it easy to recognise from across a garden.',
+      significance:
+        'A common sight in Emirati home gardens and on farms in Al Ain and the northern emirates. The latex in its leaves and unripe fruit contains papain, the enzyme used to tenderise meat.',
+      health:
+        'Papaya shows its problems loudly, which makes it a good plant to scan. Yellow-green mosaic and mottling, with puckered or narrowed young leaves, is the classic sign of papaya ringspot virus. White powdery patches are powdery mildew; fine yellow speckling with webbing underneath means spider mites. Older leaves yellowing between the veins usually point to magnesium deficiency.',
+    },
+    ar: {
+      name: 'البابايا',
+      family: 'الفصيلة البابايية',
+      leaf: 'أوراق ضخمة على شكل كف عرضها 40–70 سم، مفصّصة بعمق إلى 7–11 فصاً مفصّصة بدورها. تحملها أعناق طويلة مجوّفة تخرج من قمة ساق واحدة غير متفرعة. خضراء متوسطة من الأعلى وأفتح من الأسفل، وعروقها شاحبة تنتشر من المركز.',
+      about:
+        'البابايا نبات مثمر سريع النمو، وهو نباتياً عشبة عملاقة لا شجرة حقيقية، يُزرع في الحدائق المنزلية والمزارع في أنحاء الإمارات وقد يثمر خلال عام من زراعته. ساقه طرية مجوّفة، ويحمل كل أوراقه في تاج واحد في القمة، ما يجعله سهل التمييز من طرف الحديقة.',
+      significance:
+        'مشهد مألوف في الحدائق المنزلية الإماراتية وفي مزارع العين والإمارات الشمالية. وتحتوي عصارة أوراقه وثماره غير الناضجة على إنزيم الباباين الذي يُستخدم لتطرية اللحم.',
+      health:
+        'البابايا تُظهر مشكلاتها بوضوح، ولهذا فهي نبتة جيدة للفحص. التبرقش والتبقّع الأصفر المخضر مع تجعّد الأوراق الصغيرة أو ضيقها هو العلامة الكلاسيكية لفيروس تبقّع البابايا الحلقي. البقع البيضاء الدقيقية بياض دقيقي، والتنقيط الأصفر الناعم مع خيوط على الوجه السفلي يعني العنكبوت الأحمر. واصفرار ما بين العروق في الأوراق الأقدم يشير غالباً إلى نقص المغنيسيوم.',
     },
   },
 ];

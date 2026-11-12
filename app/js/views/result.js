@@ -57,10 +57,14 @@ function identified(scan) {
   const names = { en: species.en.name, ar: species.ar.name };
   const alt = scan.prediction.ranked.slice(1, 3).filter((r) => r.p > 0.02);
 
-  const bandTone = health.band === 'excellent' || health.band === 'good' ? 'healthy'
+  // A leaf the analyser could not separate from its background has no health
+  // reading at all. v2 drew that as a red "necrosis" pill over an empty meter,
+  // which read as "this plant is sick" -- the opposite of what happened.
+  const bandTone = !health.valid ? 'unread'
+    : health.band === 'excellent' || health.band === 'good' ? 'healthy'
     : health.band === 'fair' ? 'chlorosis' : 'necrosis';
 
-  const findings = health.valid ? health.findings : [{ level: 'bad', key: 'noLeaf' }];
+  const findings = health.valid ? health.findings : [{ level: 'info', key: 'noLeaf' }];
   const treatmentKeys = health.valid ? treatmentsFor(health.findings) : [];
   const alert = alertFor(key, health.findings);
 
@@ -84,9 +88,9 @@ function identified(scan) {
       <section class="panel result-health" aria-labelledby="health-title">
         <div class="section-head">
           <h2 id="health-title">${t('result.health')}</h2>
-          ${raw(statusPill(bandTone, t(`health.${health.band}`)))}
+          ${raw(statusPill(bandTone, health.valid ? t(`health.${health.band}`) : t('health.invalid')))}
         </div>
-        ${raw(healthMeter(health.score, health.band))}
+        ${raw(health.valid ? healthMeter(health.score, health.band) : `<p class="small">${t('health.unreadBody')}</p>`)}
         <p class="small muted">${t('health.legend')}</p>
       </section>
     </div>

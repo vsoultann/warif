@@ -271,7 +271,7 @@ const AI_POINTS = {
 const IMPACT = {
   en: [
     'A school, a municipality gardener, a farm with no reliable connection, a family with a Ghaf in the yard.',
-    'Next: finish training all ten trees, add field photographs from Al Ain, and test with a municipality nursery.',
+    'Next: add many more kiosk and field photographs from Al Ain, and test with a municipality nursery.',
     'Thank you to our supervisor and our school. Questions welcome.',
   ],
   ar: [

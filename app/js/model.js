@@ -25,11 +25,21 @@ let metadata = null;
 let ood = null;
 let loading = null;
 
-/** Reuse one offscreen canvas for every resize instead of churning through them. */
-const stage = document.createElement('canvas');
-stage.width = IMAGE_SIZE;
-stage.height = IMAGE_SIZE;
-const stageCtx = stage.getContext('2d', { willReadFrequently: true });
+/**
+ * One reusable offscreen canvas per view. They have to be separate: the WebGL
+ * backend may read a canvas after the next view has already been drawn into
+ * it, and three views through one canvas came out as three copies of the last.
+ */
+const stages = new Map();
+function stageFor(view) {
+  if (!stages.has(view)) {
+    const canvas = document.createElement('canvas');
+    canvas.width = IMAGE_SIZE;
+    canvas.height = IMAGE_SIZE;
+    stages.set(view, { canvas, ctx: canvas.getContext('2d', { willReadFrequently: true }) });
+  }
+  return stages.get(view);
+}
 
 export function getMetadata() {
   return metadata;
@@ -109,21 +119,47 @@ export function loadModel(onProgress = () => {}) {
 }
 
 /**
- * Draws any image source into the 224x224 stage, letterboxed on white so the
- * leaf keeps its aspect ratio (squashing a frond changes what the network sees).
+ * Draws any image source into the 224x224 stage.
+ *
+ * 'fit'    the whole photo, letterboxed on white so the leaf keeps its aspect
+ *          ratio (squashing a frond changes what the network sees);
+ * 'centre' the middle square of the photo at full size -- the same framing the
+ *          training photographs were cut to, and the one that sees the leaf
+ *          largest;
+ * 'mirror' that centre square flipped left to right.
  */
-function toStage(source) {
+function toStage(source, view = 'fit') {
   const sw = source.naturalWidth || source.videoWidth || source.width;
   const sh = source.naturalHeight || source.videoHeight || source.height;
-  const scale = Math.min(IMAGE_SIZE / sw, IMAGE_SIZE / sh);
-  const dw = Math.round(sw * scale);
-  const dh = Math.round(sh * scale);
 
+  const { canvas: stage, ctx: stageCtx } = stageFor(view);
+  stageCtx.setTransform(1, 0, 0, 1, 0, 0);
   stageCtx.fillStyle = '#ffffff';
   stageCtx.fillRect(0, 0, IMAGE_SIZE, IMAGE_SIZE);
-  stageCtx.drawImage(source, (IMAGE_SIZE - dw) / 2, (IMAGE_SIZE - dh) / 2, dw, dh);
+
+  if (view === 'fit') {
+    const scale = Math.min(IMAGE_SIZE / sw, IMAGE_SIZE / sh);
+    const dw = Math.round(sw * scale);
+    const dh = Math.round(sh * scale);
+    stageCtx.drawImage(source, (IMAGE_SIZE - dw) / 2, (IMAGE_SIZE - dh) / 2, dw, dh);
+    return stage;
+  }
+
+  const side = Math.min(sw, sh);
+  if (view === 'mirror') stageCtx.setTransform(-1, 0, 0, 1, IMAGE_SIZE, 0);
+  stageCtx.drawImage(source, (sw - side) / 2, (sh - side) / 2, side, side, 0, 0, IMAGE_SIZE, IMAGE_SIZE);
+  stageCtx.setTransform(1, 0, 0, 1, 0, 0);
   return stage;
 }
+
+/**
+ * The three views every photo is read through. One framing can catch a leaf
+ * badly -- too small in a letterboxed frame, or half cut off by a centre crop --
+ * and averaging three is the cheapest accuracy there is: one batched pass, no
+ * retraining, and it steadied exactly the Sidr/Samar calls that flipped from
+ * one framing to the next.
+ */
+const VIEWS = ['fit', 'centre', 'mirror'];
 
 /**
  * Classifies one image.
@@ -133,11 +169,10 @@ export async function classify(source) {
   if (!base || !head) throw new Error('Model not loaded');
 
   const [probs, featureVector] = tf.tidy(() => {
-    const pixels = tf.browser.fromPixels(toStage(source));
-    const batch = pixels.toFloat().div(255).expandDims(0);
+    const batch = tf.stack(VIEWS.map((view) => tf.browser.fromPixels(toStage(source, view)).toFloat().div(255)));
     const feats = base.execute(batch, FEATURE_NODE);
-    const flat = feats.reshape([1, feats.size]);
-    return [head.predict(flat), flat.flatten()];
+    const flat = feats.reshape([VIEWS.length, -1]);
+    return [head.predict(flat).mean(0), flat.mean(0)];
   });
 
   const values = Array.from(await probs.data());
@@ -190,6 +225,14 @@ function nearestSimilarity(features) {
  */
 const DECISIVE_MARGIN = 0.12;
 
+/**
+ * Below this gap between the first and second choice, the app says it is a
+ * close call. Sidr and Samar grow in the same wadis and a photo of a thorny
+ * branch can honestly sit between them; naming one at 51% as if it were
+ * settled is how the old model came across as simply wrong.
+ */
+const CLOSE_CALL = 0.18;
+
 /** True when the prediction is too uncertain to state plainly. */
 export function isUncertain(result) {
   return result.top.p < 0.55 || result.entropy > 0.72;
@@ -226,6 +269,8 @@ export function recognitionState(prediction, leafConfidence = null) {
   }
   if (prediction.top.p < 0.40) reasons.push('lowProbability');
   if (prediction.entropy > 0.85) reasons.push('spreadEvenly');
+  const second = prediction.ranked[1];
+  const closeCall = second && prediction.top.p - second.p < CLOSE_CALL;
 
   // One weak signal is noise; a genuine ghaf photographed badly can trip any
   // single test. Two independent ones agreeing is a real refusal. A total
@@ -245,7 +290,11 @@ export function recognitionState(prediction, leafConfidence = null) {
   if (reasons.includes('noFoliage') || farOutside || reasons.length >= 2) {
     return { state: 'unknown', reasons, similarity: prediction.similarity };
   }
-  if (reasons.length === 1 || isUncertain(prediction)) {
+  // A close call is not a reason to refuse -- both candidates are plants we
+  // know -- so it only ever downgrades to 'uncertain', and the result page
+  // shows the runner-up beside the answer.
+  if (closeCall) reasons.push('closeCall');
+  if (reasons.length >= 1 || isUncertain(prediction)) {
     return { state: 'uncertain', reasons, similarity: prediction.similarity };
   }
   return { state: 'confident', reasons, similarity: prediction.similarity };

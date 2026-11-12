@@ -179,6 +179,17 @@ export const SPECIES_ALERTS = {
       ar: 'المسكيت ليس محلياً في الإمارات. ينتشر بعدوانية، ويستنزف المياه الجوفية، ويزيح الغاف المحلي الذي يشبهه كثيراً، ولهذا يجدر التأكد أيّ الشجرتين أمامك. انظر إلى الأشواك: للمسكيت أشواك طويلة مستقيمة مزدوجة، بينما أشواك الغاف قصيرة متفرقة. وإذا كان ينمو في منطقة غاف محلي، فأبلغ وزارة التغير المناخي والبيئة بدل معالجته.',
     },
   },
+  papaya: {
+    // Mottling on a papaya is the one finding with a specific, spreading cause
+    // worth naming: papaya ringspot virus, carried between plants by aphids.
+    when: ['mottled', 'chlorosisSome', 'chlorosisHigh'],
+    level: 'warn',
+    title: { en: 'Check for papaya ringspot virus', ar: 'افحص وجود فيروس تبقّع البابايا الحلقي' },
+    body: {
+      en: 'On papaya, a yellow-green mosaic or mottling — especially with young leaves that are puckered, narrowed or curled — is the classic sign of papaya ringspot virus. It cannot be cured and aphids carry it to neighbouring papaya, so an infected plant is usually removed early. If the mottling is only on older leaves and the veins stay green, magnesium deficiency is the likelier cause.',
+      ar: 'في البابايا، التبرقش أو الفسيفساء الصفراء المخضرة، خصوصاً مع تجعّد الأوراق الصغيرة أو ضيقها أو التفافها، هو العلامة الكلاسيكية لفيروس تبقّع البابايا الحلقي. لا علاج له، وينقله المنّ إلى نباتات البابايا المجاورة، ولذلك تُزال النبتة المصابة عادةً مبكراً. أما إذا اقتصر التبرقش على الأوراق الأقدم وبقيت العروق خضراء، فالأرجح أنه نقص المغنيسيوم.',
+    },
+  },
   nakhl: {
     when: ['necrosisHigh', 'necrosisSome', 'texture'],
     level: 'bad',

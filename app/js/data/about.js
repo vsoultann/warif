@@ -121,13 +121,13 @@ export const SECTIONS = [
     body: {
       en: [
         'Photograph one leaf. The app answers two separate questions about it.',
-        'First: which tree is this? A convolutional neural network compares the leaf against ten species that between them cover most of what grows in the Emirates — from the Ghaf and the date palm to the grey mangroves of the coast, and including the invasive mesquite that is steadily replacing the Ghaf. If the leaf is none of them, the app is built to say so plainly instead of guessing, which is the single hardest thing to get an image classifier to do.',
+        'First: which tree is this? A convolutional neural network compares the leaf against twelve plants that between them cover most of what grows in the Emirates — from the Ghaf and the date palm to the grey mangroves of the coast, the vinca in every flower bed and the papaya in the back garden, and including the invasive mesquite that is steadily replacing the Ghaf. If the leaf is none of them, the app is built to say so plainly instead of guessing, which is the single hardest thing to get an image classifier to do.',
         'Second: is this leaf healthy? A separate analysis measures yellowing, dead tissue, colour evenness, greenness and surface texture, and folds them into one score out of a hundred. Deliberately, no neural network is involved in this half — every number can be explained in one sentence, and shown on the photograph itself, so that a judge can point at a brown patch and see the app agree with them.',
         'When the analysis finds a problem, the app names the likely cause, recommends the treatment that addresses it, and then helps you find that treatment: nearby nurseries and agricultural suppliers, with phone numbers, opening hours and directions.',
       ],
       ar: [
         'صوّر ورقة واحدة، فيجيب التطبيق عن سؤالين منفصلين.',
-        'الأول: ما هذه الشجرة؟ تقارن شبكة عصبية التفافية الورقة بعشرة أنواع تغطي بينها معظم ما ينمو في الإمارات، من الغاف والنخيل إلى أشجار القرم على الساحل، ومنها المسكيت الغازي الذي يزاحم الغاف تدريجياً. وإذا لم تكن الورقة من بينها، فالتطبيق مصمَّم ليقول ذلك صراحةً بدل التخمين، وهو أصعب سلوك يمكن تعليمه لمصنِّف صور.',
+        'الأول: ما هذه الشجرة؟ تقارن شبكة عصبية التفافية الورقة باثنتي عشرة نبتة تغطي بينها معظم ما ينمو في الإمارات، من الغاف والنخيل إلى أشجار القرم على الساحل، والونكة في أحواض الزهور والبابايا في الحدائق المنزلية، ومنها المسكيت الغازي الذي يزاحم الغاف تدريجياً. وإذا لم تكن الورقة من بينها، فالتطبيق مصمَّم ليقول ذلك صراحةً بدل التخمين، وهو أصعب سلوك يمكن تعليمه لمصنِّف صور.',
         'والثاني: هل هذه الورقة سليمة؟ يقيس تحليل منفصل الاصفرار والنسيج الميت وتجانس اللون ودرجة الخضرة وتباين الملمس، ثم يجمعها في درجة واحدة من مئة. وعن قصد، لا تتدخل أي شبكة عصبية في هذا النصف: كل رقم يمكن شرحه في جملة واحدة وإظهاره على الصورة نفسها، حتى يستطيع المحكّم أن يشير إلى بقعة بنية ويرى التطبيق يوافقه.',
         'وحين يرصد التحليل مشكلة، يسمّي التطبيق السبب المرجّح، ويوصي بالعلاج المناسب، ثم يساعدك على إيجاده: مشاتل وموردون زراعيون قريبون منك، مع أرقام الهاتف وساعات العمل والاتجاهات.',
       ],
@@ -184,8 +184,8 @@ export const SECTIONS = [
 export const LIMITS = [
   {
     id: 'four-classes',
-    en: 'The library documents ten trees and the deployed model recognises four. The other six are reference material and are marked "Reference only" everywhere they appear; a scan will never return one. Finishing the training is two commands, and the interface reads the count from the model rather than from a heading.',
-    ar: 'تُوثّق المكتبة عشر أشجار، ويتعرّف النموذج المنشور على أربع منها. والست الباقية مادة مرجعية تحمل شارة «للاطّلاع فقط» أينما ظهرت، ولن يعيدها المسح أبداً. وإكمال التدريب أمران اثنان، والواجهة تقرأ العدد من النموذج لا من عنوان مكتوب.',
+    en: 'Two pairs in the library are genuinely hard to tell apart from one photograph: Ghaf and Mesquite, and Sidr and Samar. When the top two scores are close the app says it is a close call and shows the runner-up, rather than naming one as if it were settled. The model is trained mostly on field photographs; the team\'s own kiosk photographs of vinca and papaya are in the set, but there are only a handful of them so far.',
+    ar: 'في المكتبة زوجان يصعب التفريق بينهما فعلاً من صورة واحدة: الغاف والمسكيت، والسدر والسمر. وعندما تتقارب أعلى درجتين يقول التطبيق إن النتيجة متقاربة ويعرض الاحتمال الثاني، بدل تسمية أحدهما كأنه محسوم. دُرّب النموذج في معظمه على صور ميدانية، وصور الفريق للونكة والبابايا من الكشك ضمن المجموعة، لكنها قليلة حتى الآن.',
   },
   {
     id: 'ood-scope',

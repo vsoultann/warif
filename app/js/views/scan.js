@@ -18,7 +18,7 @@ import { weaveMarkup, Weave, runStages, pixelGridOn } from '../ui/weave.js';
 import { ensureModel, onModelProgress } from '../ui/model-gate.js';
 import { classify, recognitionState } from '../model.js';
 import { recognisedKeys, counts } from '../metadata.js';
-import { analyseLeaf } from '../health.js';
+import { analyseLeaf, refineForSpecies } from '../health.js';
 import { setScan } from '../state.js';
 import { go } from '../router.js';
 import { CONFIG } from '../config.js';
@@ -283,7 +283,7 @@ function mount(root, ctx) {
     announce(t('scan.analysing'));
 
     try {
-      const [health, prediction, verdict] = await runStages(weave, [
+      const [leaf, prediction, verdict] = await runStages(weave, [
         () => analyseLeaf(canvas),
         async () => { await ensureModel(); return classify(canvas); },
         ([leaf, species]) => ({
@@ -292,6 +292,10 @@ function mount(root, ctx) {
           overlay: leaf.overlay ? leaf.overlay.toDataURL('image/jpeg', 0.85) : null,
         }),
       ]);
+
+      const health = verdict.recognition.state === 'unknown'
+        ? leaf
+        : refineForSpecies(leaf, prediction.top.key);
 
       setScan({
         at: Date.now(),

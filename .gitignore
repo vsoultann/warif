@@ -4,3 +4,5 @@ dataset/cache/
 !dataset/inaturalist/CREDITS.json
 .DS_Store
 *.log
+dataset/custom/
+dataset/kiosk-test/

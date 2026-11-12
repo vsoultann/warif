@@ -81,7 +81,7 @@ export const SLIDES = [
     seconds: 45,
     title: { en: 'Impact and next steps', ar: 'الأثر والخطوات القادمة' },
     notes: {
-      en: 'Who it helps: a school, a municipality gardener, a farm without a reliable connection, a family with a Ghaf in the yard. Next: finish training all ten trees, add more field photographs from Al Ain, and test with a municipality nursery. Thank the supervisor and the school, invite questions, and point at the feedback QR.',
+      en: 'Who it helps: a school, a municipality gardener, a farm without a reliable connection, a family with a Ghaf in the yard. Next: add many more kiosk and field photographs from Al Ain, and test with a municipality nursery. Thank the supervisor and the school, invite questions, and point at the feedback QR.',
       ar: 'من ينتفع به: مدرسة، وعامل حدائق في بلدية، ومزرعة بلا اتصال موثوق، وأسرة في فنائها شجرة غاف. والقادم: إكمال تدريب الأشجار العشر، وإضافة صور ميدانية أكثر من العين، والاختبار مع مشتل تابع لبلدية. اشكر المشرف والمدرسة، وافتح باب الأسئلة، وأشِر إلى رمز الاستبيان.',
     },
   },

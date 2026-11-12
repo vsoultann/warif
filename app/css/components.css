@@ -344,6 +344,8 @@
   .status-chlorosis .swatch { background: var(--chlorosis-fill); }
   .status-necrosis { color: var(--necrosis); }
   .status-necrosis .swatch { background: var(--necrosis-fill); }
+  .status-unread { color: var(--ink-muted); }
+  .status-unread .swatch { background: currentColor; opacity: 0.35; }
 
   /* ============================================== data tables / matrix ==== */
   .data-table { width: 100%; font-size: var(--t-small); }

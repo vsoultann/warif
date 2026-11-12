@@ -117,6 +117,36 @@ const SHAPES = {
     pinnate(24, 27, 12, 8, { pairs: 9, length: 4.6 }) +
     pinnate(24, 27, 36, 8, { pairs: 9, length: 4.6 }) +
     `M24 34l-8-4.5M24 34l8-4.5M24 39l-6.5-3M24 39l6.5-3`,
+  /* Vinca: a pair of glossy opposite ovals on a soft stem, pale midribs. */
+  vinca: () =>
+    `M24 46V6` +
+    `M24 30C14 31 6 26 4 20c7-3 16-1 20 10Z` +
+    `M24 30C34 31 42 26 44 20c-7-3-16-1-20 10Z` +
+    `M24 30L9 22M24 30l15-8` +
+    `M24 14c-6 .5-11-2-12-6 5-1.5 10 0 12 6Zm0 0c6 .5 11-2 12-6-5-1.5-10 0-12 6Z`,
+
+  /* Papaya: one huge hand-shaped blade, deeply cut into lobes, on a long stalk. */
+  papaya: () => {
+    // Seven broad, round-shouldered lobes fanned over the top of a long stalk,
+    // with a vein running out to every tip.
+    const cx = 24, cy = 27, lobes = 7, from = -200, to = 20;
+    const at = (deg, r) => {
+      const a = (deg * Math.PI) / 180;
+      return `${round(cx + r * Math.cos(a))} ${round(cy + r * Math.sin(a))}`;
+    };
+    const step = (to - from) / lobes;
+    let d = `M24 46V${cy}M${at(from, 9)}`;
+    let veins = '';
+    for (let i = 0; i < lobes; i++) {
+      const s0 = from + i * step;
+      const tip = s0 + step / 2;
+      const s1 = s0 + step;
+      d += `C${at(s0 + step * 0.12, 16)} ${at(tip - step * 0.32, 20)} ${at(tip, 22)}`;
+      d += `C${at(tip + step * 0.32, 20)} ${at(s1 - step * 0.12, 16)} ${at(s1, 9)}`;
+      veins += `M${cx} ${cy}L${at(tip, 14)}`;
+    }
+    return d + `L${cx} ${cy}Z` + veins;
+  },
 };
 
 /**

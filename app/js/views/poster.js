@@ -201,11 +201,11 @@ const POSTER = {
   researchTitle: { en: 'Our research', ar: 'بحثنا' },
   research: {
     en: [
-      'We chose ten trees that between them cover most of what grows here, documented the leaf signs for each, and photographed real leaves across Al Ain.',
+      'We chose twelve plants that between them cover most of what grows here, documented the leaf signs for each, and photographed real leaves across Al Ain.',
       'Training images come from openly licensed field photographs, every one credited in the repository. The app was then tested against real leaves rather than only against reference images.',
     ],
     ar: [
-      'اخترنا عشر أشجار تغطي بينها معظم ما ينمو هنا، ووثّقنا علامات الأوراق في كل منها، وصوّرنا أوراقاً حقيقية في أنحاء العين.',
+      'اخترنا اثنتي عشرة نبتة تغطي بينها معظم ما ينمو هنا، ووثّقنا علامات الأوراق في كل منها، وصوّرنا أوراقاً حقيقية في أنحاء العين.',
       'وتأتي صور التدريب من صور ميدانية مفتوحة الترخيص، وكل صورة موثّقة في المستودع. ثم اختُبر التطبيق على أوراق حقيقية لا على الصور المرجعية وحدها.',
     ],
   },
@@ -230,8 +230,8 @@ const POSTER = {
     ],
   },
   accuracyNote: {
-    en: 'Read live from the model’s own metadata. The library documents ten trees; the deployed model recognises the number shown, and the rest are marked "Reference only" throughout the app.',
-    ar: 'تُقرأ مباشرةً من بيانات النموذج نفسه. توثّق المكتبة عشر أشجار، ويتعرّف النموذج المنشور على العدد المعروض، وتحمل البقية شارة «للاطّلاع فقط» في كل مكان من التطبيق.',
+    en: 'Read live from the model’s own metadata: the library documents twelve plants and the deployed model recognises the number shown.',
+    ar: 'تُقرأ مباشرةً من بيانات النموذج نفسه: توثّق المكتبة اثنتي عشرة نبتة، ويتعرّف النموذج المنشور على العدد المعروض.',
   },
   calibrationNote: {
     en: 'The first health analyser called healthy leaves sick — it was reading the dark background as dead tissue. Measured before and after on the same reference photographs.',
@@ -242,7 +242,7 @@ const POSTER = {
   impact: {
     en: [
       'It runs entirely on the device: no account, no upload, no server, and it works with the connection switched off — which is the condition a farm in Al Dhafra or a school in Fujairah is actually in.',
-      'Next: finish training all ten trees, add field photographs from Al Ain, and test with a municipality nursery.',
+      'Next: add many more kiosk and field photographs from Al Ain, and test with a municipality nursery.',
     ],
     ar: [
       'يعمل بالكامل على الجهاز: بلا حساب ولا رفع ولا خادم، ويعمل والاتصال مقطوع، وهي حال مزرعة في الظفرة أو مدرسة في الفجيرة فعلاً.',
